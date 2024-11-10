@@ -51,13 +51,13 @@ def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, w
 
         # Training loss difference
         next_loss = total_loss
-        delta_loss = prev_loss - next_loss
+        delta_loss = next_loss - prev_loss
         print(cc("CYAN", f"Training loss delta: {ccnum(delta_loss, reverse=True)}" + cc("GRAY", f" ({delta_loss:.2e})")))
         prev_loss = next_loss
 
         # Learning rate difference
         next_lr = optimizer.param_groups[0]["lr"]
-        delta_lr = prev_lr - next_lr
+        delta_lr = next_lr - prev_lr
         print(cc("CYAN", f"Learning rate delta: {ccnum(delta_lr, reverse=True)}" + cc("GRAY", f" ({delta_lr:.2e})")))
         prev_lr = next_lr
 
