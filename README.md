@@ -6,13 +6,23 @@
 |--------|---------|
 | Python | 3.9     |
 
+## Running the code
+
+To start training the model, run the `main.py` file (`python main.py`).
+
+- Configure the training in the file under `Training parameters`
+
+To test the model, run the `inference.py` file (`python inference.py`).
+
+- Configure the inference in the file (specify the path to the image you want to test)
+
 ### Dataset structure
 
 The dataset should be structured as follows:
 
 ```
 dataset
-├── empty (empty directory to be filled with rejected images with no annotations)
+├── empty (empty directory to be filled with rejected images with no annotations, should not happen)
 ├── annotations
 │   ├── test
 │   └── train

@@ -42,7 +42,7 @@ def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, w
         writer.add_scalar("Learning Rate", optimizer.param_groups[0]["lr"], step_count)
 
         # Console logging
-        print(cc("BLUE", f"Epoch [{epoch_count + 1}/{num_epochs}] - Step {step_count}/{total_steps}:"))
+        print(cc("BLUE", f"Epoch [{epoch_count + 1}/{num_epochs}] - Step {step_count + 1}/{total_steps}:"))  # count starts from 0
         print(cc("CYAN", f"Total loss: {total_loss}" + cc("GRAY", f" ({next_loss:.2e})")))
         print(cc("CYAN", f"Learning rate: {optimizer.param_groups[0]['lr']}" + cc("GRAY", f" ({optimizer.param_groups[0]['lr']:.2e})")))
         print(cc("BLUE",
@@ -61,5 +61,5 @@ def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, w
         print(cc("CYAN", f"Learning rate delta: {ccnum(delta_lr, reverse=True)}" + cc("GRAY", f" ({delta_lr:.2e})")))
         prev_lr = next_lr
 
-    print(cc("GREEN", f"Epoch [{epoch_count + 1}/{num_epochs}] complete in {time.time() - epoch_timer:.3f} seconds"))  # Epoch count starts from 0
+    print(cc("GREEN", f"Epoch [{epoch_count + 1}/{num_epochs}] complete in {time.time() - epoch_timer:.3f} seconds"))  # count starts from 0
     scheduler.step()  # Step the scheduler after each epoch

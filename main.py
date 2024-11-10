@@ -18,7 +18,7 @@ Run configuration
 """
 DATA_DIR = "./dataset"
 OUTPUT_DIR = "./output"  # The directory will be created if it does not exist
-model_save_path = os.path.join(OUTPUT_DIR, "inference_graph-nov10.pth")  # file name
+model_save_path = os.path.join(OUTPUT_DIR, "inference_graph.pth")  # file name
 
 # Initialize TensorBoard SummaryWriter
 writer = SummaryWriter(log_dir=os.path.join(OUTPUT_DIR, "tensorboard_logs"))

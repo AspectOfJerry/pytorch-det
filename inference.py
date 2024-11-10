@@ -10,7 +10,7 @@ from modules.utils import get_device
 Run configuration
 """
 # Confidence threshold
-MODEL_PATH = "output/inference_graph-nov10.pth"
+MODEL_PATH = "output/inference_graph.pth"
 MIN_PRED_CONF = 0.3
 
 # Label indices start from 1, 0 is reserved for the background class
