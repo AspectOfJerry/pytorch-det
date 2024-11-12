@@ -1,6 +1,6 @@
 import cv2
 import torch
-from torchinfo import summary
+import torchinfo
 
 from cc import cc
 from modules.model import new_model
@@ -37,7 +37,7 @@ model.eval()
 
 # Model summary
 print(cc("GRAY", "Model summary:"))
-print(cc("GRAY", str(summary(
+print(cc("GRAY", str(torchinfo.summary(
     model,
     input_size=(1, 3, 512, 512),
     verbose=0,

@@ -3,8 +3,9 @@ import os
 import time
 
 import torch
+import torchinfo
+import torchvision
 from torch.utils.tensorboard import SummaryWriter
-from torchinfo import summary
 
 from cc import cc
 from modules.dataset import new_datasets, new_data_loaders
@@ -32,28 +33,67 @@ NUM_EPOCHS = 36
 # Number of images per batch
 BATCH_SIZE = 32
 
-# Initial step size, usually between 0.0001 and 0.01 ?
-LEARNING_RATE = 0.0003
-
-# Interval (in epochs) to decay the learning rate, usually 20-30% of the total number of epochs ?
-STEP_SIZE = 6
-
-# Factor by which the learning rate decays, usually around 0.5 ?
-GAMMA = 0.670
-
 # Number of classes in the dataset (excluding background)
 NUM_CLASSES = 1
+
+# Data augmentation and normalization for training
+DATA_TRANSFORM_TRAIN = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
+
+# Data transformation and normalization for testing
+DATA_TRANSFORM_TEST = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
+
+"""
+Optimizer parameters
+- Learning rate: Initial learning rate
+- Betas: Coefficients used for computing running averages of gradient and its square
+- Epsilon: Term added to the denominator to improve numerical stability
+- Weight decay: L2 penalty
+- AMSGrad: Whether to use the AMSGrad variant of this algorithm from the paper "On the Convergence of Adam and Beyond"
+"""
+# Initial learning rate. Default: 1e-3 (0.001)
+LEARNING_RATE = 0.0003
+
+# Coefficients used for computing running averages of gradient and its square. Default: (0.9, 0.999)
+BETAS = (0.9, 0.999)
+
+# Term added to the denominator to improve numerical stability. Default: 1e-8 (0.00000001)
+EPS = 0.00000001  # 1e-8
+
+# Weight decay (L2 penalty). Default: 0
+WEIGHT_DECAY = 0.0
+
+# Use the AMSGrad variant of this algorithm from the paper "On the Convergence of Adam and Beyond". default: False
+AMSGRAD = False
+
+"""
+Scheduler parameters
+- Step size: Period of learning rate decay
+- Gamma: Multiplicative factor of learning rate decay
+- Last epoch: The index of the last epoch
+"""
+# Period of learning rate decay, usually 20-30% of the total number of epochs (?)
+STEP_SIZE = 6
+
+# Multiplicative factor of learning rate decay. Default: 0.1
+GAMMA = 0.670
+
+# The index of the last epoch. Default: -1
+LAST_EPOCH = -1
 
 """
 Creating the model
 """
 print(cc("YELLOW", "Initializing model..."))
 model = new_model(out_features=NUM_CLASSES + 1)  # add 1 for the background class
+
+optimizer = new_optimizer(model=model, learning_rate=LEARNING_RATE, betas=BETAS, eps=EPS, weight_decay=WEIGHT_DECAY, amsgrad=AMSGRAD)
+scheduler = new_scheduler(optimizer=optimizer, step_size=STEP_SIZE, gamma=GAMMA, last_epoch=LAST_EPOCH)
+
 model.train()
 
 # Model summary
 print(cc("GRAY", "Model summary:"))
-print(cc("GRAY", str(summary(
+print(cc("GRAY", str(torchinfo.summary(
     model,
     input_size=(BATCH_SIZE, 3, 512, 512),
     verbose=0,
@@ -85,12 +125,11 @@ Data preparation
 # Datasets
 print(cc("YELLOW", "Creating datasets..."))
 # Note: transforms are applied in the new_datasets function
-train_dataset, test_dataset = new_datasets(data_dir=DATA_DIR, device=DEVICE)
+train_dataset, test_dataset = new_datasets(data_dir=DATA_DIR, device=DEVICE, data_transform_train=DATA_TRANSFORM_TRAIN, data_transform_test=DATA_TRANSFORM_TEST)
 
 # Data loaders
 print(cc("YELLOW", "Creating data loaders..."))
-cpu_count = 0
-train_loader, test_loader = new_data_loaders(batch_size=BATCH_SIZE, train_dataset=train_dataset, test_dataset=test_dataset)
+train_loader, test_loader = new_data_loaders(batch_size=BATCH_SIZE, train_dataset=train_dataset, test_dataset=test_dataset, cpu_count=0)
 
 # Additional training details
 batches_per_epoch = math.ceil(len(train_dataset) / BATCH_SIZE)
@@ -102,17 +141,11 @@ print(cc("CYAN", f"Total training batches: {total_steps}"))
 print(cc("CYAN", f"Validation dataset: {len(test_dataset)} images"))
 print(cc("GRAY", "-------------------------"))
 
-optimizer = new_optimizer(model, LEARNING_RATE)
-scheduler = new_scheduler(optimizer, STEP_SIZE, GAMMA)
-
 input(cc("GREEN", "Ready to begin training with the current configuration. Press any key to continue . . ."))
 
 start_time = time.time()
 
 # Training loop
-total_steps = NUM_EPOCHS * len(train_loader)
-# prev_loss, prev_lr = 0, optimizer.param_groups[0]["lr"]
-
 for epoch in range(NUM_EPOCHS):
     train_epoch(
         model=model,

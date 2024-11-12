@@ -1,4 +1,4 @@
-# Setup
+# PyTorch object detection setup
 
 ### Requirements
 
@@ -6,23 +6,13 @@
 |--------|---------|
 | Python | 3.9     |
 
-## Running the code
-
-To start training the model, run the `main.py` file (`python main.py`).
-
-- Configure the training in the file under `Training parameters`
-
-To test the model, run the `inference.py` file (`python inference.py`).
-
-- Configure the inference in the file (specify the path to the image you want to test)
-
 ### Dataset structure
 
 The dataset should be structured as follows:
 
 ```
 dataset
-├── empty (empty directory to be filled with rejected images with no annotations, should not happen)
+├── temp (rejected images, should not happen)
 ├── annotations
 │   ├── test
 │   └── train
@@ -31,54 +21,52 @@ dataset
     └── train
 ```
 
-### Run tensorboard
+### Run tensorboard (optional)
 
-To run tensorboard, use the following command:
+TensorBoard can be used to monitor the training process, including losses and metrics. To start TensorBoard, run:
 
 ```bash
 tensorboard --logdir=./output/tensorboard_logs
 ```
 
-### venv
+This will display training progress in your browser.
 
-To run the project in a Python virtual environment, run the following commands:
+### Using a venv (Recommended)
+
+Creating a virtual environment helps manage project dependencies independently of other Python projects.
+If you use PyCharm, its virtual environment manager makes this very easy and straightforward.
+
+Alternatively, to set it up manually:
 
 ```bash
 python -m venv venv
 ```
 
-## CPU-only
+Activate the virtual environment before proceeding with the installation of dependencies. You might need to reopen a new terminal.
 
-Install the dependencies for CPU-only training using the following command:
+## Installing dependencies
 
-From PyTorch's website:
+From [PyTorch's website](https://pytorch.org/get-started/locally/), here are the installation commands:
+
+### CPU-only
+
+Use this command to install PyTorch with only CPU support:
 
 ```bash
 pip install torch torchvision torchaudio
 ```
 
-and to install common dependencies for both CPU and CUDA training:
+### GPU (NVIDIA CUDA)
 
-```bash
-pip install -r requirements.txt
-```
-
-```
-torchinfo~=1.8.0
-opencv-python~=4.10.0.84
-pillow~=10.2.0
-tensorboard~=2.18.0
-```
-
-## GPU (NVIDIA CUDA)
-
-From PyTorch's website:
+Use this command to install PyTorch with GPU support:
 
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 ```
 
-and to install common dependencies for both CPU and CUDA training:
+### Common dependencies
+
+And install the other necessary libraries:
 
 ```bash
 pip install -r requirements.txt
@@ -88,19 +76,25 @@ pip install -r requirements.txt
 torchinfo~=1.8.0
 opencv-python~=4.10.0.84
 pillow~=10.3.0
-tensorboard~=2.18.0
+tensorboard
 ```
 
-If you have an NVIDIA GPU, you can install the CUDA toolkit and cuDNN to enable GPU support. If you don't have an NVIDIA GPU, skip the following steps.
+> **Note**: PyTorch’s GPU version comes bundled with all necessary binaries, such as CUDA and cuDNN, so you don’t need to install them separately.
 
-- Download and install [CUDA 12.4 for Windows](https://developer.nvidia.com/cuda-12-4-0-download-archive)
-- Download and install [Visual Studio](https://visualstudio.microsoft.com/) with C++ build tools
-    - In the Visual Studio Installer, under Workloads, select Desktop development with C++
-    - **or** Under Individual components, select MSVC v... - VS 20.. C++ x64/x86 build tools *(not sure if that works. i selected the full c++ bundle)*
-    - Proceed with the installation
-- Download [cuDNN](https://developer.nvidia.com/rdp/cudnn-download) (any compatible version)
-    - Create an NVIDIA developer account if you don't have one
-- Extract the cuDNN zip file
-    - Copy the files from the `bin` folder to `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\bin`
-    - Copy the files from the `include` folder to `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\include`
-    - Copy the files from the `lib\x64` folder to `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\lib\x64`
+<br>
+
+~~### Installing CUDA and cuDNN~~
+
+~~If you have an NVIDIA GPU, you can install the CUDA toolkit and cuDNN to enable GPU support. If you don't have an NVIDIA GPU, skip the following steps.~~
+
+~~- Download and install [CUDA 12.4 for Windows](https://developer.nvidia.com/cuda-12-4-0-download-archive)~~
+~~- Download and install [Visual Studio](https://visualstudio.microsoft.com/) with C++ build tools~~
+~~- In the Visual Studio Installer, under Workloads, select Desktop development with C++~~
+~~- **or** Under Individual components, select MSVC v... - VS 20.. C++ x64/x86 build tools *(not sure if that works. i selected the full c++ bundle)*~~
+~~- Proceed with the installation~~
+~~- Download [cuDNN](https://developer.nvidia.com/rdp/cudnn-download) (any compatible version)~~
+~~- Create an NVIDIA developer account if you don't have one~~
+~~- Extract the cuDNN zip file~~
+~~- Copy the files from the `bin` folder to `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\bin`~~
+~~- Copy the files from the `include` folder to `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\include`~~
+~~- Copy the files from the `lib\x64` folder to `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\lib\x64`~~

@@ -3,10 +3,6 @@ import torch
 from cc import cc
 
 
-def collate_fn(batch):
-    return tuple(zip(*batch))
-
-
 def get_device(cuda_avail):
     device = torch.device("cuda" if cuda_avail else "cpu")
 
