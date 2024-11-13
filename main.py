@@ -59,8 +59,8 @@ BETAS = (0.9, 0.999)
 # Term added to the denominator to improve numerical stability. Default: 1e-8 (0.00000001)
 EPS = 0.00000001  # 1e-8
 
-# Weight decay (L2 penalty). Default: 0
-WEIGHT_DECAY = 0.0
+# Weight decay (L2 penalty). Default: 1e-2 (0.01)
+WEIGHT_DECAY = 0.005
 
 # Use the AMSGrad variant of this algorithm from the paper "On the Convergence of Adam and Beyond". default: False
 AMSGRAD = False
@@ -83,7 +83,7 @@ LAST_EPOCH = -1
 """
 Creating the model
 """
-print(cc("YELLOW", "Initializing model..."))
+print(cc("YELLOW", f"Initializing model with {NUM_CLASSES} classes (excluding background)..."))
 model = new_model(out_features=NUM_CLASSES + 1)  # add 1 for the background class
 
 optimizer = new_optimizer(model=model, learning_rate=LEARNING_RATE, betas=BETAS, eps=EPS, weight_decay=WEIGHT_DECAY, amsgrad=AMSGRAD)
@@ -101,12 +101,22 @@ print(cc("GRAY", str(torchinfo.summary(
     row_settings=["var_names"]
 ))))
 
-# Logging training parameters
+# Logging parameters
+print(cc("BLUE", "Training parameters"))
 print(cc("CYAN", f"Number of epochs: {NUM_EPOCHS}"))
 print(cc("CYAN", f"Batch size: {BATCH_SIZE}"))
+print(cc("GRAY", "-------------------------"))
+print(cc("BLUE", "Optimizer parameters"))
 print(cc("CYAN", f"Learning rate: {LEARNING_RATE}"))
+print(cc("CYAN", f"Betas: {BETAS}"))
+print(cc("CYAN", f"Epsilon: {EPS}"))
+print(cc("CYAN", f"Weight decay: {WEIGHT_DECAY}"))
+print(cc("CYAN", f"Use AMSGrad: {AMSGRAD}"))
+print(cc("GRAY", "-------------------------"))
+print(cc("BLUE", "Scheduler parameters"))
 print(cc("CYAN", f"Step size: {STEP_SIZE}"))
 print(cc("CYAN", f"Gamma: {GAMMA}"))
+print(cc("CYAN", f"Last epoch: {LAST_EPOCH}"))
 print(cc("GRAY", "-------------------------"))
 
 """

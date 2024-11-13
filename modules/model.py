@@ -14,8 +14,8 @@ def new_model(out_features):
     return model
 
 
-def new_optimizer(model, learning_rate=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0, amsgrad=False):
-    optimizer = torch.optim.Adam(
+def new_optimizer(model, learning_rate=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False):
+    optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=learning_rate,
         betas=betas,
