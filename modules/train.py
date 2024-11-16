@@ -9,7 +9,7 @@ prev_loss = 0
 next_loss = 0
 
 
-def train_step(model, images, targets, optimizer, device):
+def _train_step(model, images, targets, optimizer, device):
     model.train()  # Ensure the model is in training mode
     images = [image.to(device) for image in images]
     targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
@@ -34,7 +34,7 @@ def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, w
 
     for step, (images, targets) in enumerate(train_loader):
         # Call train_step for a single batch
-        total_loss, losses = train_step(model, images, targets, optimizer, device)
+        total_loss, losses = _train_step(model, images, targets, optimizer, device)
 
         # Log to TensorBoard
         step_count = epoch_count * len(train_loader) + step
