@@ -39,12 +39,14 @@ def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, w
         # Log to TensorBoard
         step_count = epoch_count * len(train_loader) + step
         writer.add_scalar("Loss/total_loss", total_loss, step_count)
-        writer.add_scalar("Learning Rate", optimizer.param_groups[0]["lr"], step_count)
+        for i, lr in enumerate(scheduler.get_last_lr()):
+            writer.add_scalar(f"Learning Rate/param_group{i}", lr, step_count)
 
         # Console logging
         print(cc("BLUE", f"Epoch [{epoch_count + 1}/{num_epochs}] - Step {step_count + 1}/{total_steps}:"))  # count starts from 0
         print(cc("CYAN", f"Total loss: {total_loss}" + cc("GRAY", f" ({next_loss:.2e})")))
-        print(cc("CYAN", f"Learning rate: {optimizer.param_groups[0]['lr']}" + cc("GRAY", f" ({optimizer.param_groups[0]['lr']:.2e})")))
+        for i, lr in enumerate(scheduler.get_last_lr()):
+            print(cc("CYAN", f"Learning rate: {lr}" + cc("GRAY", f" ({lr:.2e})")))
         print(cc("BLUE",
                  f"- Losses:\n"
                  + "\n".join([f"  - {key}: {loss}" for key, loss in losses.items()]) + "\n"))
@@ -56,7 +58,7 @@ def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, w
         prev_loss = next_loss
 
         # Learning rate difference
-        next_lr = optimizer.param_groups[0]["lr"]
+        next_lr = scheduler.get_last_lr()[0]
         delta_lr = next_lr - prev_lr
         print(cc("CYAN", f"Learning rate delta: {ccnum(delta_lr, reverse=True)}" + cc("GRAY", f" ({delta_lr:.2e})")))
         prev_lr = next_lr

@@ -49,9 +49,10 @@ Optimizer parameters
 - Epsilon: Term added to the denominator to improve numerical stability
 - Weight decay: L2 penalty
 - AMSGrad: Whether to use the AMSGrad variant of this algorithm from the paper "On the Convergence of Adam and Beyond"
+https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html
 """
 # Initial learning rate. Default: 1e-3 (0.001)
-LEARNING_RATE = 0.0003
+LEARNING_RATE = 0.0005
 
 # Coefficients used for computing running averages of gradient and its square. Default: (0.9, 0.999)
 BETAS = (0.9, 0.999)
@@ -60,7 +61,7 @@ BETAS = (0.9, 0.999)
 EPS = 0.00000001  # 1e-8
 
 # Weight decay (L2 penalty). Default: 1e-2 (0.01)
-WEIGHT_DECAY = 0.005
+WEIGHT_DECAY = 0.0005
 
 # Use the AMSGrad variant of this algorithm from the paper "On the Convergence of Adam and Beyond". default: False
 AMSGRAD = False
@@ -72,10 +73,10 @@ Scheduler parameters
 - Last epoch: The index of the last epoch
 """
 # Period of learning rate decay, usually 20-30% of the total number of epochs (?)
-STEP_SIZE = 6
+STEP_SIZE = 8
 
 # Multiplicative factor of learning rate decay. Default: 0.1
-GAMMA = 0.670
+GAMMA = 0.800
 
 # The index of the last epoch. Default: -1
 LAST_EPOCH = -1
