@@ -154,7 +154,7 @@ train_loader, test_loader = datasets.new_data_loaders(
 batches_per_epoch = math.ceil(len(train_dataset) / BATCH_SIZE)
 total_steps = math.ceil(len(train_dataset) / BATCH_SIZE) * NUM_EPOCHS
 
-print(cc("CYAN", "Training dataset: {len(train_dataset)} images"))
+print(cc("CYAN", f"Training dataset: {len(train_dataset)} images"))
 print(cc("CYAN", f"Batches per epoch: {batches_per_epoch}"))
 print(cc("CYAN", f"Total training batches: {total_steps}"))
 print(cc("CYAN", f"Validation dataset: {len(test_dataset)} images"))

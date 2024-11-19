@@ -8,12 +8,7 @@ def collate_fn(batch):
     return tuple(zip(*batch))
 
 
-def new_datasets(
-    data_dir,
-    device,
-    data_transform_train=torchvision.transforms.Compose([torchvision.transforms.ToTensor()]),
-    data_transform_test=torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
-):
+def new_datasets(data_dir, device, data_transform_train=None, data_transform_test=None):
     train_dataset = CustomDataset(data_dir, "train", transform=data_transform_train, device=device)
     test_dataset = CustomDataset(data_dir, "test", transform=data_transform_test, device=device)
 

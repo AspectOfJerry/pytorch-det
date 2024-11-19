@@ -1,4 +1,7 @@
 import time
+from collections import OrderedDict
+
+import torch
 
 from cc import cc, ccnum
 
@@ -8,19 +11,59 @@ next_lr = 0
 prev_loss = 0
 next_loss = 0
 
+"""
+fasterrcnn_mobilenet_v3_large_320_fpn losses
+- loss_objectness: Measures how well the RPN predicts whether a region contains an object.
+- loss_rpn_box_reg: Measures how well the RPN refines candidate box coordinates.
+- loss_classifier: Measures the accuracy of the predicted class labels for detected objects.
+- loss_box_reg: Measures the accuracy of bounding box predictions for detected objects.
+"""
 
-def _train_step(model, images, targets, optimizer, device):
+
+def _train_step(model, images, targets, optimizer, device, clip_threshold=100.0):
     model.train()  # Ensure the model is in training mode
     images = [image.to(device) for image in images]
     targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
+    # Use the model transforms to preprocess images and targets
+    images, targets = model.transform(images, targets)
+
     # Forward pass
-    losses = model(images, targets)
+    # Extract features from the backbone
+    feature_maps = model.backbone(images.tensors)
+
+    # Ensure feature_maps is always an OrderedDict even if backbone returns single tensor
+    if isinstance(feature_maps, torch.Tensor):
+        feature_maps = OrderedDict([("0", feature_maps)])
+
+    # Generate region proposals using the Region Proposal Network (RPN)
+    proposals, rpn_losses = model.rpn(images, feature_maps, targets)
+
+    # Perform Region of Interest (ROI) pooling
+    detections, roi_losses = model.roi_heads(feature_maps, proposals, images, targets)
+
+    losses = {}
+    losses.update(rpn_losses)
+    losses.update(roi_losses)
+
+    # losses = model(images, targets)
     total_loss = sum(loss for loss in losses.values())
 
     # Backward pass
     optimizer.zero_grad()
     total_loss.backward()
+
+    # Clip parameters to avoid exploding gradients
+    for name, param in model.named_parameters():
+        if param.grad is not None:
+            grad = param.grad
+            max_grad = grad.max()
+            min_grad = grad.min()
+
+            if max_grad > clip_threshold or min_grad < -clip_threshold:
+                print(cc("RED", f"Clipping gradient in parameter '{name}' (max={max_grad.item()}, min={min_grad.item()})"))
+                grad.data.clamp_(-clip_threshold, clip_threshold)
+
     optimizer.step()
 
     return total_loss.item(), losses
