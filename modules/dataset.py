@@ -1,5 +1,4 @@
 import torch
-import torchvision
 
 from custom_dataset import CustomDataset
 

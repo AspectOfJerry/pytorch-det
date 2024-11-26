@@ -7,16 +7,14 @@ import torchinfo
 import torchvision
 from torch.utils.tensorboard import SummaryWriter
 
-from cc import cc
 import modules.dataset as datasets
 import modules.evaluate as evaluate
 import modules.model as models
 import modules.train as trainer
 import modules.utils as utils
+from cc import cc
 
-"""
-Run configuration
-"""
+# Run configuration
 DATA_DIR = "./dataset"
 OUTPUT_DIR = "./output"  # The directory will be created if it does not exist
 model_save_path = os.path.join(OUTPUT_DIR, "inference_graph.pth")  # file name
@@ -26,6 +24,10 @@ writer = SummaryWriter(log_dir=os.path.join(OUTPUT_DIR, "tensorboard_logs"))
 
 """
 Training parameters
+- Number of epochs: Total training cycles
+- Batch size: Number of images per batch
+- Number of classes: Number of classes in the dataset (excluding background)
+- Data transformation: Data augmentation and normalization for training
 """
 # Total training cycles
 NUM_EPOCHS = 36
@@ -81,9 +83,7 @@ GAMMA = 0.800
 # The index of the last epoch. Default: -1
 LAST_EPOCH = -1
 
-"""
-Creating the model
-"""
+# Create model
 print(cc("YELLOW", f"Initializing model with {NUM_CLASSES} classes (excluding background)..."))
 model = models.new_model(out_features=NUM_CLASSES + 1)  # add 1 for the background class
 
@@ -124,9 +124,7 @@ print(cc("CYAN", f"Gamma: {GAMMA}"))
 print(cc("CYAN", f"Last epoch: {LAST_EPOCH}"))
 print(cc("GRAY", "-------------------------"))
 
-"""
-Configuring devices
-"""
+# Configure device
 print(cc("YELLOW", "Configuring devices..."))
 DEVICE = utils.get_device(torch.cuda.is_available())
 print(cc("GRAY", "-------------------------"))
@@ -134,9 +132,6 @@ print(cc("GRAY", "-------------------------"))
 # Move model to configured device
 model.to(DEVICE)
 
-"""
-Data preparation
-"""
 # Datasets
 print(cc("YELLOW", "Creating datasets..."))
 # Note: transforms are applied in the new_datasets function
@@ -181,11 +176,8 @@ for epoch in range(NUM_EPOCHS):
 
 print(cc("GREEN", f"Training complete! Took {time.time() - start_time:.3f} seconds"))
 
-"""
-Post-training and cleanup
-"""
-# Close the TensorBoard SummaryWriter
-writer.close()
+# Post training and cleanup
+writer.close()  # close TensorBoard SummaryWriter
 
 # Save .pth model
 if not os.path.exists(OUTPUT_DIR):
@@ -194,9 +186,7 @@ if not os.path.exists(OUTPUT_DIR):
 torch.save(model.state_dict(), model_save_path)
 print(cc("GRAY", f"Trained model saved at {model_save_path}"))
 
-"""
-Evaluation
-"""
+# Evaluation
 input("Press any key to proceed to evaluation . . .")
 
 # Run evaluation on the test dataset

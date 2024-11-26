@@ -20,16 +20,16 @@ fasterrcnn_mobilenet_v3_large_320_fpn losses
 """
 
 
-def _train_step(model, images, targets, optimizer, device, clip_threshold=100.0):
-    model.train()  # Ensure the model is in training mode
+def _train_step(model, images, targets, optimizer, device):
+    model.train()
     images = [image.to(device) for image in images]
     targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-    # Use the model transforms to preprocess images and targets
+    # Use model transforms to preprocess images and targets
     images, targets = model.transform(images, targets)
 
     # Forward pass
-    # Extract features from the backbone
+    # Extract features from backbone
     feature_maps = model.backbone(images.tensors)
 
     # Ensure feature_maps is always an OrderedDict even if backbone returns single tensor
@@ -39,7 +39,7 @@ def _train_step(model, images, targets, optimizer, device, clip_threshold=100.0)
     # Generate region proposals using the Region Proposal Network (RPN)
     proposals, rpn_losses = model.rpn(images, feature_maps, targets)
 
-    # Perform Region of Interest (ROI) pooling
+    # Region of Interest (ROI) pooling
     detections, roi_losses = model.roi_heads(feature_maps, proposals, images, targets)
 
     losses = {}
@@ -52,8 +52,15 @@ def _train_step(model, images, targets, optimizer, device, clip_threshold=100.0)
     # Backward pass
     optimizer.zero_grad()
     total_loss.backward()
+    _clamp_gradients(model, 100)
 
-    # Clip parameters to avoid exploding gradients
+    optimizer.step()
+
+    return total_loss.item(), losses
+
+
+# Clip parameters to avoid exploding gradients
+def _clamp_gradients(model, clip_threshold):
     for name, param in model.named_parameters():
         if param.grad is not None:
             grad = param.grad
@@ -64,10 +71,6 @@ def _train_step(model, images, targets, optimizer, device, clip_threshold=100.0)
                 print(cc("RED", f"Clipping gradient in parameter '{name}' (max={max_grad.item()}, min={min_grad.item()})"))
                 grad.data.clamp_(-clip_threshold, clip_threshold)
 
-    optimizer.step()
-
-    return total_loss.item(), losses
-
 
 def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, writer, epoch_count, total_steps):
     global prev_loss, next_loss, prev_lr, next_lr
@@ -76,7 +79,7 @@ def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, w
     print(cc("GREEN", f"Beginning epoch {epoch_count + 1}/{num_epochs}..."))
 
     for step, (images, targets) in enumerate(train_loader):
-        # Call train_step for a single batch
+        # Call train_step for single batch
         total_loss, losses = _train_step(model, images, targets, optimizer, device)
 
         # Log to TensorBoard
@@ -107,4 +110,4 @@ def train_epoch(model, train_loader, optimizer, scheduler, num_epochs, device, w
         prev_lr = next_lr
 
     print(cc("GREEN", f"Epoch [{epoch_count + 1}/{num_epochs}] complete in {time.time() - epoch_timer:.3f} seconds"))  # count starts from 0
-    scheduler.step()  # Step the scheduler after each epoch
+    scheduler.step()  # Step scheduler after each epoch
