@@ -7,16 +7,14 @@ import torchinfo
 import torchvision
 from torch.utils.tensorboard import SummaryWriter
 
+import modules.dataset as datasets
+import modules.evaluate as evaluate
+import modules.model as models
+import modules.train as trainer
+import modules.utils as utils
 from cc import cc
-from modules.dataset import new_datasets, new_data_loaders
-from modules.evaluate import evaluate_model
-from modules.model import new_model, new_optimizer, new_scheduler
-from modules.train import train_epoch
-from modules.utils import get_device
 
-"""
-Run configuration
-"""
+# Run configuration
 DATA_DIR = "./dataset"
 OUTPUT_DIR = "./output"  # The directory will be created if it does not exist
 model_save_path = os.path.join(OUTPUT_DIR, "inference_graph.pth")  # file name
@@ -26,6 +24,10 @@ writer = SummaryWriter(log_dir=os.path.join(OUTPUT_DIR, "tensorboard_logs"))
 
 """
 Training parameters
+- Number of epochs: Total training cycles
+- Batch size: Number of images per batch
+- Number of classes: Number of classes in the dataset (excluding background)
+- Data transformation: Data augmentation and normalization for training
 """
 # Total training cycles
 NUM_EPOCHS = 36
@@ -81,14 +83,16 @@ GAMMA = 0.800
 # The index of the last epoch. Default: -1
 LAST_EPOCH = -1
 
-"""
-Creating the model
-"""
+# Create model
 print(cc("YELLOW", f"Initializing model with {NUM_CLASSES} classes (excluding background)..."))
-model = new_model(out_features=NUM_CLASSES + 1)  # add 1 for the background class
+model = models.new_model(out_features=NUM_CLASSES + 1)  # add 1 for the background class
 
-optimizer = new_optimizer(model=model, learning_rate=LEARNING_RATE, betas=BETAS, eps=EPS, weight_decay=WEIGHT_DECAY, amsgrad=AMSGRAD)
-scheduler = new_scheduler(optimizer=optimizer, step_size=STEP_SIZE, gamma=GAMMA, last_epoch=LAST_EPOCH)
+optimizer = models.new_optimizer(
+    model=model, learning_rate=LEARNING_RATE, betas=BETAS, eps=EPS, weight_decay=WEIGHT_DECAY, amsgrad=AMSGRAD
+)
+scheduler = models.new_scheduler(
+    optimizer=optimizer, step_size=STEP_SIZE, gamma=GAMMA, last_epoch=LAST_EPOCH
+)
 
 model.train()
 
@@ -120,27 +124,26 @@ print(cc("CYAN", f"Gamma: {GAMMA}"))
 print(cc("CYAN", f"Last epoch: {LAST_EPOCH}"))
 print(cc("GRAY", "-------------------------"))
 
-"""
-Configuring devices
-"""
+# Configure device
 print(cc("YELLOW", "Configuring devices..."))
-DEVICE = get_device(torch.cuda.is_available())
+DEVICE = utils.get_device(torch.cuda.is_available())
 print(cc("GRAY", "-------------------------"))
 
 # Move model to configured device
 model.to(DEVICE)
 
-"""
-Data preparation
-"""
 # Datasets
 print(cc("YELLOW", "Creating datasets..."))
 # Note: transforms are applied in the new_datasets function
-train_dataset, test_dataset = new_datasets(data_dir=DATA_DIR, device=DEVICE, data_transform_train=DATA_TRANSFORM_TRAIN, data_transform_test=DATA_TRANSFORM_TEST)
+train_dataset, test_dataset = datasets.new_datasets(
+    data_dir=DATA_DIR, device=DEVICE, data_transform_train=DATA_TRANSFORM_TRAIN, data_transform_test=DATA_TRANSFORM_TEST
+)
 
 # Data loaders
 print(cc("YELLOW", "Creating data loaders..."))
-train_loader, test_loader = new_data_loaders(batch_size=BATCH_SIZE, train_dataset=train_dataset, test_dataset=test_dataset, cpu_count=0)
+train_loader, test_loader = datasets.new_data_loaders(
+    batch_size=BATCH_SIZE, train_dataset=train_dataset, test_dataset=test_dataset, cpu_count=0
+)
 
 # Additional training details
 batches_per_epoch = math.ceil(len(train_dataset) / BATCH_SIZE)
@@ -158,7 +161,7 @@ start_time = time.time()
 
 # Training loop
 for epoch in range(NUM_EPOCHS):
-    train_epoch(
+    trainer.train_epoch(
         model=model,
         train_loader=train_loader,
         optimizer=optimizer,
@@ -173,11 +176,8 @@ for epoch in range(NUM_EPOCHS):
 
 print(cc("GREEN", f"Training complete! Took {time.time() - start_time:.3f} seconds"))
 
-"""
-Post-training and cleanup
-"""
-# Close the TensorBoard SummaryWriter
-writer.close()
+# Post training and cleanup
+writer.close()  # close TensorBoard SummaryWriter
 
 # Save .pth model
 if not os.path.exists(OUTPUT_DIR):
@@ -186,13 +186,11 @@ if not os.path.exists(OUTPUT_DIR):
 torch.save(model.state_dict(), model_save_path)
 print(cc("GRAY", f"Trained model saved at {model_save_path}"))
 
-"""
-Evaluation
-"""
+# Evaluation
 input("Press any key to proceed to evaluation . . .")
 
 # Run evaluation on the test dataset
-evaluate_model(model=model, test_loader=test_loader, device=DEVICE)
+evaluate.evaluate_model(model=model, test_loader=test_loader, device=DEVICE)
 
 """
 print("Conversion to TFLite does not work at the moment!")
