@@ -12,7 +12,7 @@ The dataset should be structured as follows:
 
 ```
 dataset
-├── temp (rejected images, should not happen)
+├── discarded (rejected images, should not happen)
 ├── annotations
 │   ├── test
 │   └── train

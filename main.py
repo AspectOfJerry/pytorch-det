@@ -22,6 +22,9 @@ model_save_path = os.path.join(OUTPUT_DIR, "inference_graph.pth")  # file name
 # Initialize TensorBoard SummaryWriter
 writer = SummaryWriter(log_dir=os.path.join(OUTPUT_DIR, "tensorboard_logs"))
 
+os.makedirs(os.path.join(DATA_DIR, "empty", "images"), exist_ok=True)
+os.makedirs(os.path.join(DATA_DIR, "empty", "annotations"), exist_ok=True)
+
 """
 Training parameters
 - Number of epochs: Total training cycles
