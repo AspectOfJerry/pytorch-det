@@ -8,7 +8,7 @@ import modules.utils as utils
 from cc import cc
 
 # Configuration
-MODEL_PATH = "output/inference_graph.pth"
+MODEL_PATH = "output/models/inference_graph.pth"
 MIN_PRED_CONF = 0.3
 box_color_map = {"high": (0, 255, 0), "medium": (0, 255, 255), "low": (0, 0, 255)}
 label_map = {

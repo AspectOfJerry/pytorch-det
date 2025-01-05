@@ -33,7 +33,7 @@ Training parameters
 - Data transformation: Data augmentation and normalization for training
 """
 # Total training cycles
-NUM_EPOCHS = 36
+NUM_EPOCHS = 2
 
 # Number of images per batch
 BATCH_SIZE = 32
@@ -194,31 +194,3 @@ input("Press any key to proceed to evaluation . . .")
 
 # Run evaluation on the test dataset
 evaluate.evaluate_model(model=model, test_loader=test_loader, device=DEVICE)
-
-"""
-print("Conversion to TFLite does not work at the moment!")
-input("Press any key to continue (exporting to ONNX then to TFLite) . . .")
-
-# onnx~=1.14.1
-# tf2onnx~=1.15.1
-
-# Export the PyTorch model to ONNX format
-input_shape = (BATCH_SIZE, 3, 3024, 3024)
-dummy_input = torch.randn(input_shape)
-onnx_path = os.path.join(OUTPUT_DIR, "saved_model.onnx")
-torch.onnx.export(model, dummy_input, onnx_path, verbose=True, opset_version=12)
-
-# Convert ONNX model to TFLite
-onnx_model = onnx.load(onnx_path)
-
-# Specify target_opset and optimize
-tflite_model = onnx_tf.backend.prepare(onnx_model, strict=False)
-# https://github.com/onnx/onnx-tensorflow/issues/763
-# optimized_onnx_model = tflite_model.graph.as_graph_def()
-# tflite_optimized_model = tf2onnx.convert.from_graph_def(optimized_onnx_model, opset=12, output_path=None)
-
-tflite_path = os.path.join(OUTPUT_DIR, "saved_model.tflite")
-tflite_model.export_graph(tflite_path)
-# with open(tflite_path, "wb") as f:
-#     f.write(tflite_model)
-"""
